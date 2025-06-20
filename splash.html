@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Swim Tracker Splash</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom right, #0077b6, #90e0ef);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2rem;
+      color: white;
+      margin-bottom: 2rem;
+    }
+    .button {
+      background: white;
+      color: #0077b6;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      margin: 0.5rem;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Swim Tracker</h1>
+  <button class="button" onclick="location.href='workout-a.html'">Workout A (Pool)</button>
+  <button class="button" onclick="location.href='workout-b.html'">Workout B (Distance)</button>
+  <button class="button" onclick="location.href='progress-workout-a.html'">View Workout A Progress</button>
+  <button class="button" onclick="location.href='progress-workout-b.html'">View Workout B Progress</button>
+</body>
+</html>
