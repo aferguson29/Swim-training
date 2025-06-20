@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swim Training Checklist</title>
+  <style>
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #0077b6;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.75rem 0;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .footer-bar button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .footer-bar button:hover {
+      text-decoration: underline;
+    }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background-color: #f0f4f8;
+    }
+    .splash {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(#cceeff, #f0f4f8);
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .splash select, .splash button {
+      font-size: 1.2rem;
+      margin: 0.5rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #0077b6;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .splash button:hover {
+      background-color: #005f87;
+    }
+    .section {
+      display: none;
+      padding: 1rem;
+    }
+    .exercise {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+    }
+    .exercise input[type="text"] {
+      width: 80px;
+      margin-left: 10px;
+      padding: 3px;
+    }
+    .technique-focus {
+      background-color: #e0f7ff;
+      padding: 0.5rem;
+      border-left: 4px solid #0077b6;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+  .exit-button {
+      font-size: 1rem;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 12px;
+      background-color: #023e8a;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .exit-button:hover {
+      background-color: #0077b6;
+    }
+  
+</head>
+<body>
+  
+    <button onclick="viewSummary()">View Progress Summary</button>
+    <button onclick="viewPastWorkouts()">View Past Workouts</button>
+    <h1>Swim Training</h1>
+    <label for="weekSelect" style="color: #003366; margin-bottom: 1rem;">Select Week:</label>
+    <select id="weekSelect" onchange="updateWeekStatuses(this)">
+  <option value="1">Week 1</option>
+  <option value="2">Week 2</option>
+  <option value="3">Week 3</option>
+  <option value="4">Week 4</option>
+  <option value="5">Week 5</option>
+  <option value="6">Week 6</option>
+  <option value="7">Week 7</option>
+  <option value="8">Week 8</option>
+  <option value="9">Week 9</option>
+  <option value="10">Week 10</option>
+  <option value="11">Week 11</option>
+  <option value="12">Week 12</option>
+</select>
+    <button onclick="showWorkout('A')">Workout A (Pool)</button>
+    <button onclick="showWorkout('B')">Workout B (Distance - Pool/Open)</button>
+  </div>
+
+  
+    <div style="margin-top: 2rem;"><button class="exit-button" onclick="exitToSplash()">Exit</button></div>
+    <div class="exercise"><label><input type="checkbox"> 4x25m kick with board - Rest: 20s</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 4x25m drills - Rest: 20-30s</label><input type="text" placeholder="Time"></div>
+
+    <h3>Drills (Pick 2–3)</h3>
+    <div class="exercise"><label><input type="checkbox"> Catch-Up Drill</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> Fingertip Drag</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 3-3-3 Drill</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> Side Kick Drill</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> Streamline Glide Push-Offs</label><input type="text" placeholder="Time"></div>
+
+    <div class="footer-bar">
+  <button onclick="exitToSplash()">Exit</button>
+</div>
+
+
+      Technique Focus: Body flat like a plank, eyes down, exhale underwater with quick inhale to the side, pull through to hip, small kicks from hips.
+    </div>
+  </div>
+
+  
+    <div style="margin-top: 2rem;"><button onclick="exitToSplash()">Exit</button></div>
+    <div class="exercise"><label><input type="checkbox"> 100m kick - Rest: 30s</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 100m pull buoy - Rest: 30s</label><input type="text" placeholder="Time"></div>
+
+    <h3>Main Set (Week Based)</h3>
+    <div class="exercise"><label><input type="checkbox"> 4x50m - Rest: 30s</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 4x100m - Rest: 30s</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 3x150m - Rest: 45s</label><input type="text" placeholder="Time"></div>
+    <div class="exercise"><label><input type="checkbox"> 2x200m + 1x100m - Rest: 45s</label><input type="text" placeholder="Time"></div>
+
+    
+<div style="margin-top: 1rem;">
+  <label for="notes">📝 Daily Notes:</label><br>
+  <textarea id="notes" rows="3" style="width: 100%; max-width: 100%; padding: 0.5rem;"></textarea>
+</div>
+<div style="margin-top: 1rem;">
+  <button onclick="markAsMissed()" style="background-color: #e63946; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">Mark Workout as Missed</button>
+</div>
+  </div>
+
+  <script>
+    function updateWeekStatuses(dropdown) {
+      const options = dropdown.options;
+      for (let i = 0; i < options.length; i++) {
+        const weekNum = i + 1;
+        const missed = localStorage.getItem('w' + weekNum + '_missed');
+        let completed = false;
+        for (let j = 0; j < 100; j++) {
+          if (localStorage.getItem('w' + weekNum + '_checkbox_' + j) === 'true') {
+            completed = true;
+            break;
+          }
+        }
+        if (missed === 'true') {
+          options[i].text = 'Week ' + weekNum + ' ❌';
+        } else if (completed) {
+          options[i].text = 'Week ' + weekNum + ' ✅';
+        } else {
+          options[i].text = 'Week ' + weekNum + ' ⏳';
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const weekDropdown = document.getElementById('weekSelect');
+      if (weekDropdown) updateWeekStatuses(weekDropdown);
+    });
+    function showWorkout(type) {
+      const week = document.getElementById('weekSelect').value;
+      localStorage.setItem('selectedWeek', week);
+      localStorage.setItem('selectedWorkout', type);
+
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('workoutA').style.display = type === 'A' ? 'block' : 'none';
+      document.getElementById('workoutB').style.display = type === 'B' ? 'block' : 'none';
+    }
+
+    // Save and load checkbox and input states scoped by week
+    const week = localStorage.getItem('selectedWeek') || '1';
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const textInputs = document.querySelectorAll('input[type="text"]');
+
+    checkboxes.forEach((checkbox, index) => {
+      const key = 'w' + week + '_checkbox_' + index;
+      const saved = localStorage.getItem(key);
+      if (saved !== null) checkbox.checked = saved === 'true';
+      checkbox.addEventListener('change', () => {
+        localStorage.setItem(key, checkbox.checked);
+      });
+    });
+
+    textInputs.forEach((input, index) => {
+      const key = 'w' + week + '_input_' + index;
+      const saved = localStorage.getItem(key);
+      if (saved !== null) input.value = saved;
+      input.addEventListener('input', () => {
+        localStorage.setItem(key, input.value);
+      });
+    });
+  
+
+    function exitToSplash() {
+      document.getElementById('workoutA').style.display = 'none';
+      document.getElementById('workoutB').style.display = 'none';
+      document.getElementById('pastWorkouts').style.display = 'none';
+      document.getElementById('splash').style.display = 'flex';
+    }
+<div id="pastWorkouts" class="section">
+    <h2>Past Workouts</h2>
+    <select id="pastWeekSelect">
+      <option value="1">Week 1</option>
+      <option value="2">Week 2</option>
+      <option value="3">Week 3</option>
+      <option value="4">Week 4</option>
+      <option value="5">Week 5</option>
+      <option value="6">Week 6</option>
+      <option value="7">Week 7</option>
+      <option value="8">Week 8</option>
+      <option value="9">Week 9</option>
+      <option value="10">Week 10</option>
+      <option value="11">Week 11</option>
+      <option value="12">Week 12</option>
+    </select>
+    <button onclick="loadPastWorkouts()">Load</button>
+    <pre id="pastWorkoutData" style="background:#fff;padding:1rem;margin-top:1rem;overflow:auto;max-height:300px;border:1px solid #ccc;"></pre>
+  </div>
+
+  <script>
+    function viewPastWorkouts() {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('workoutA').style.display = 'none';
+      document.getElementById('workoutB').style.display = 'none';
+      document.getElementById('pastWorkouts').style.display = 'block';
+    }
+
+    function loadPastWorkouts() {
+      const week = document.getElementById('pastWeekSelect').value;
+      let output = '';
+      for (let i = 0; i < 100; i++) {
+        const checkKey = 'w' + week + '_checkbox_' + i;
+        const inputKey = 'w' + week + '_input_' + i;
+        const checkVal = localStorage.getItem(checkKey);
+        const inputVal = localStorage.getItem(inputKey);
+        if (checkVal !== null || inputVal !== null) {
+          output += `Exercise ${i + 1} - Completed: ${checkVal || 'false'}, Time: ${inputVal || ''}
+`;
+        }
+      }
+      document.getElementById('pastWorkoutData').textContent = output || 'No data found for selected week.';
+    }
+    // Save and Load Notes
+  const notesKey = 'w' + week + '_notes';
+  const notesArea = document.getElementById('notes');
+  if (notesArea && localStorage.getItem(notesKey)) {
+    notesArea.value = localStorage.getItem(notesKey);
+  }
+  if (notesArea) {
+    notesArea.addEventListener('input', () => {
+      localStorage.setItem(notesKey, notesArea.value);
+    });
+  }
+
+  // Mark as Missed
+  function markAsMissed() {
+    localStorage.setItem('w' + week + '_missed', 'true');
+    alert('Workout marked as missed.');
+  }
+
+
+<div id="summaryPage" class="section">
+  <h2>Progress Summary</h2>
+  <ul id="summaryList" style="line-height: 2;"></ul>
+  <button class="exit-button" onclick="exitToSplash()">Back to Splash</button>
+</div>
+<script>
+function viewSummary() {
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('workoutA').style.display = 'none';
+  document.getElementById('workoutB').style.display = 'none';
+  document.getElementById('pastWorkouts').style.display = 'none';
+  document.getElementById('summaryPage').style.display = 'block';
+  const list = document.getElementById('summaryList');
+  list.innerHTML = '';
+  for (let week = 1; week <= 12; week++) {
+    const missed = localStorage.getItem('w' + week + '_missed');
+    let completed = false;
+    for (let i = 0; i < 100; i++) {
+      if (localStorage.getItem('w' + week + '_checkbox_' + i) === 'true') {
+        completed = true;
+        break;
+      }
+    }
+    let status = '⏳ In Progress';
+    if (missed === 'true') status = '❌ Missed';
+    else if (completed) status = '✅ Completed';
+    const item = document.createElement('li');
+    item.textContent = `Week ${week}: ${status}`;
+    list.appendChild(item);
+  }
+}
+</script>
+
+</html>
