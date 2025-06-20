@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workout B Progress</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --blue-primary: #0077b6;
+      --blue-dark: #023e8a;
+      --blue-light: #90e0ef;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom right, var(--blue-primary), var(--blue-light));
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+    canvas {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      max-width: 100%;
+      height: auto !important;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      background: white;
+      color: var(--blue-primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin: 0.5rem 0.5rem 0 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Workout B Progress</h1>
+  <div class="container">
+    <canvas id="progressChart"></canvas>
+    <button onclick="backToSplash()">Back to Menu</button>
+  </div>
+
+  <script>
+    function backToSplash() {
+      window.location.href = 'splash.html';
+    }
+
+    function loadData() {
+      const stored = JSON.parse(localStorage.getItem('workoutBDistances')) || [];
+      return stored.sort((a,b) => {
+        return a.week.localeCompare(b.week);
+      });
+    }
+
+    function renderChart() {
+      const data = loadData();
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      const labels = data.map(d => d.week);
+      const warmup = data.map(d => d.warmup);
+      const cooldown = data.map(d => d.cooldown);
+      const mainValues = data.map(d => d.value);
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Warmup', data: warmup, borderColor: 'blue', fill: false },
+            { label: 'Main Set', data: mainValues, borderColor: 'red', fill: false },
+            { label: 'Cooldown', data: cooldown, borderColor: 'orange', fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    renderChart();
+  </script>
+</body>
+</html>
