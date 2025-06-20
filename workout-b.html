@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workout B (Distance)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom right, #0077b6, #90e0ef);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: white;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+    select, input {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: none;
+      width: 100%;
+      max-width: 300px;
+    }
+    .exercise {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 350px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .exercise h3 {
+      margin: 0;
+      color: #0077b6;
+    }
+    .exercise p {
+      margin-top: 0.25rem;
+      color: #333;
+      font-size: 0.9rem;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 26px;
+      margin-top: 0.5rem;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .toggle input:checked + .slider {
+      background-color: #0077b6;
+    }
+    .toggle input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    .footer-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      background: white;
+      color: #0077b6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Workout B Log</h1>
+
+  <select id="weekSelector">
+    <option value="" disabled selected>Select Week</option>
+    <option value="Week 1">Week 1</option>
+    <option value="Week 2">Week 2</option>
+    <option value="Week 3">Week 3</option>
+    <option value="Week 4">Week 4</option>
+    <option value="Week 5">Week 5</option>
+    <option value="Week 6">Week 6</option>
+    <option value="Week 7">Week 7</option>
+    <option value="Week 8">Week 8</option>
+    <option value="Week 9">Week 9</option>
+    <option value="Week 10">Week 10</option>
+    <option value="Week 11">Week 11</option>
+    <option value="Week 12">Week 12</option>
+  </select>
+
+  <div class="exercise">
+    <h3>Warmup</h3>
+    <p>Easy 200m swim, focus on steady breathing and long strokes.</p>
+    <input type="number" id="warmupTime" placeholder="Time (min)" />
+    <label class="toggle">
+      <input type="checkbox" id="warmupComplete" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="exercise">
+    <h3>Continuous Swim</h3>
+    <p>Swim continuously at a steady, sustainable pace.</p>
+    <label>
+      <input type="radio" name="mode" value="distance" checked onchange="toggleMode()" /> Distance
+    </label>
+    <label>
+      <input type="radio" name="mode" value="time" onchange="toggleMode()" /> Time
+    </label>
+    <input type="number" id="distanceInput" placeholder="Distance (m)" />
+    <input type="number" id="timeInput" placeholder="Time (min)" style="display:none;" />
+    <label class="toggle">
+      <input type="checkbox" id="mainComplete" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="exercise">
+    <h3>Cooldown</h3>
+    <p>Slow-paced 100m swim to relax muscles.</p>
+    <input type="number" id="cooldownTime" placeholder="Time (min)" />
+    <label class="toggle">
+      <input type="checkbox" id="cooldownComplete" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="footer-buttons">
+    <button onclick="saveWorkoutB()">Save Workout</button>
+    <button onclick="exitWithoutSaving()">Exit Without Saving</button>
+    <button onclick="viewProgress()">View Progress</button>
+    <button onclick="backToSplash()">Back to Menu</button>
+  </div>
+
+  <script>
+    function toggleMode() {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      document.getElementById('distanceInput').style.display = mode === 'distance' ? 'block' : 'none';
+      document.getElementById('timeInput').style.display = mode === 'time' ? 'block' : 'none';
+    }
+
+    function saveWorkoutB() {
+      const week = document.getElementById('weekSelector').value;
+      const warmup = parseInt(document.getElementById('warmupTime').value);
+      const cooldown = parseInt(document.getElementById('cooldownTime').value);
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const mainValue =
+        mode === 'distance'
+          ? parseInt(document.getElementById('distanceInput').value)
+          : parseInt(document.getElementById('timeInput').value);
+
+      if (!week || isNaN(warmup) || isNaN(mainValue) || isNaN(cooldown)) {
+        alert('Please complete all fields.');
+        return;
+      }
+
+      const entry = { week, warmup, cooldown, mode, value: mainValue };
+      const stored = JSON.parse(localStorage.getItem('workoutBDistances')) || [];
+      const filtered = stored.filter((e) => e.week !== week);
+      filtered.push(entry);
+      localStorage.setItem('workoutBDistances', JSON.stringify(filtered));
+      alert('Workout saved!');
+    }
+
+    function exitWithoutSaving() {
+      window.location.href = 'splash.html';
+    }
+
+    function viewProgress() {
+      window.location.href = 'progress-workout-b.html';
+    }
+
+    function backToSplash() {
+      window.location.href = 'splash.html';
+    }
+  </script>
+</body>
+</html>
