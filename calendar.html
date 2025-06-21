@@ -4,96 +4,277 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout Calendar</title>
-  <link rel="stylesheet" href="calendar-style.css" />
   <style>
-    .calendar-header {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom right, #0077b6, #90e0ef);
+      color: white;
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      text-align: center;
+      gap: 0.5rem;
+      max-width: 400px;
+      margin: 0 auto 1rem auto;
+    }
+    .day-header {
       font-weight: bold;
-      margin-top: 10px;
+      text-align: center;
+    }
+    .day {
+      background: white;
       color: #0077b6;
+      border-radius: 8px;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .day.today {
+      border: 2px solid #023e8a;
+      font-weight: bold;
+    }
+    .emoji {
+      font-size: 1.2rem;
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
     }
     .summary {
-      margin-top: 2rem;
+      max-width: 400px;
+      margin: 1rem auto;
       background: white;
+      color: #0077b6;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .back-button {
+      display: block;
+      margin: 2rem auto 0 auto;
+      background: white;
+      color: #0077b6;
+      padding: 0.75rem 1.25rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: #0077b6;
       padding: 1rem;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 999;
+      width: 90%;
+      max-width: 400px;
     }
-    .summary h3 {
+    .modal select, .modal input {
+      width: 100%;
       margin-bottom: 0.5rem;
-      color: #0077b6;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
-    .summary p {
-      margin: 0.3rem 0;
-      color: #333;
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .modal-buttons button {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #0077b6;
+      color: white;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="calendar-container">
-    <h1 id="monthYear"></h1>
-    <div class="calendar-header">
-      <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-    </div>
-    <div id="calendar" class="calendar"></div>
-    <div class="calendar-buttons">
-      <button onclick="changeMonth(-1)">Last Month</button>
-      <button onclick="changeMonth(1)">Next Month</button>
-    </div>
-    <div id="summary" class="summary">
-      <h3>Monthly Summary</h3>
-      <p>🏃‍♂️ Run: <span id="runSummary"></span></p>
-      <p>🚴‍♀️ Bike: <span id="bikeSummary"></span></p>
-      <p>🏊‍♂️ Swim: <span id="swimSummary"></span></p>
-      <p>🏋️ Weights: <span id="weightsSummary"></span></p>
-      <p>🏑 Hockey: <span id="hockeySummary"></span></p>
-    </div>
-    <button onclick="window.location.href='index.html'" class="back-button">Back to Main Menu</button>
-  </div>
+  <h1>Workout Calendar</h1>
+  <div id="month"></div>
+  <div class="calendar" id="calendar"></div>
+  <div class="summary" id="summary"></div>
+  <button class="back-button" onclick="window.location.href='index.html'">Back to Main Menu</button>
 
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="modalDate"></h2>
-      <div id="existingWorkout" class="hidden"></div>
-      <div id="inputForm">
-        <label for="type">Workout Type:</label>
-        <select id="type" onchange="toggleDetails()">
-          <option value="">Select...</option>
-          <option value="run">🏃‍♂️ Run</option>
-          <option value="bike">🚴‍♀️ Bike</option>
-          <option value="swim">🏊‍♂️ Swim</option>
-          <option value="weights">🏋️ Weights</option>
-          <option value="hockey">🏑 Hockey</option>
-        </select>
-
-        <div id="distanceTimeFields" class="hidden">
-          <input type="number" id="distance" placeholder="Distance (km)" />
-          <input type="number" id="duration" placeholder="Time (minutes)" />
-        </div>
-
-        <div id="weightsOptions" class="hidden">
-          <select id="weightsType">
-            <option value="push">Push</option>
-            <option value="pull">Pull</option>
-            <option value="legs">Legs</option>
-          </select>
-        </div>
-
-        <button onclick="saveWorkout()">Save</button>
-      </div>
-      <div id="existingButtons" class="hidden">
-        <button onclick="editWorkout()">Edit</button>
-        <button onclick="deleteWorkout()">Delete</button>
-      </div>
+  <div class="modal" id="modal" style="display:none;">
+    <h3 id="modalDate"></h3>
+    <select id="workoutType" onchange="handleWorkoutType()">
+      <option value="">Select Workout Type</option>
+      <option value="run">🏃‍♂️ Run</option>
+      <option value="bike">🚴‍♂️ Bike</option>
+      <option value="swim">🏊‍♂️ Swim</option>
+      <option value="weights">🏋️‍♂️ Weights</option>
+      <option value="hockey">🏑 Hockey</option>
+    </select>
+    <input type="number" id="distance" placeholder="Distance (km or m)" />
+    <input type="number" id="duration" placeholder="Time (minutes)" />
+    <select id="weightsType" style="display:none;">
+      <option value="push">Push</option>
+      <option value="pull">Pull</option>
+      <option value="legs">Legs</option>
+    </select>
+    <div class="modal-buttons">
+      <button onclick="saveWorkout()">Save</button>
       <button onclick="closeModal()">Back</button>
     </div>
   </div>
 
-  <script src="calendar-script.js"></script>
+  <script>
+    const calendar = document.getElementById('calendar');
+    const monthDisplay = document.getElementById('month');
+    const summary = document.getElementById('summary');
+    const modal = document.getElementById('modal');
+    const modalDate = document.getElementById('modalDate');
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let selectedDate = '';
+
+    function saveToLocalStorage(data) {
+      localStorage.setItem('workoutCalendar', JSON.stringify(data));
+    }
+
+    function getFromLocalStorage() {
+      return JSON.parse(localStorage.getItem('workoutCalendar')) || {};
+    }
+
+    function renderCalendar(month, year) {
+      calendar.innerHTML = '';
+      monthDisplay.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      const daysHeader = ['M','T','W','T','F','S','S'];
+      daysHeader.forEach(day => {
+        const div = document.createElement('div');
+        div.classList.add('day-header');
+        div.textContent = day;
+        calendar.appendChild(div);
+      });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const start = (firstDay + 6) % 7;
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const data = getFromLocalStorage();
+
+      for (let i = 0; i < start; i++) {
+        const empty = document.createElement('div');
+        calendar.appendChild(empty);
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const div = document.createElement('div');
+        div.classList.add('day');
+        const date = new Date(year, month, day);
+        const iso = date.toISOString().split('T')[0];
+        div.textContent = day;
+        if (date.toDateString() === today.toDateString()) div.classList.add('today');
+        div.onclick = () => openModal(iso);
+
+        if (data[iso]) {
+          const type = data[iso].type;
+          const emojiMap = { run: '🏃‍♂️', bike: '🚴‍♂️', swim: '🏊‍♂️', weights: '🏋️‍♂️', hockey: '🏑' };
+          const emoji = emojiMap[type];
+          if (emoji) {
+            const span = document.createElement('span');
+            span.classList.add('emoji');
+            span.textContent = emoji;
+            div.appendChild(span);
+          }
+        }
+        calendar.appendChild(div);
+      }
+      updateSummary();
+    }
+
+    function openModal(date) {
+      selectedDate = date;
+      modalDate.textContent = `Workout on ${date}`;
+      document.getElementById('workoutType').value = '';
+      document.getElementById('distance').value = '';
+      document.getElementById('duration').value = '';
+      document.getElementById('weightsType').style.display = 'none';
+      modal.style.display = 'block';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    function handleWorkoutType() {
+      const type = document.getElementById('workoutType').value;
+      document.getElementById('distance').style.display = ['run','bike','swim'].includes(type) ? 'block' : 'none';
+      document.getElementById('duration').style.display = ['run','bike','swim'].includes(type) ? 'block' : 'none';
+      document.getElementById('weightsType').style.display = type === 'weights' ? 'block' : 'none';
+    }
+
+    function saveWorkout() {
+      const type = document.getElementById('workoutType').value;
+      const distance = document.getElementById('distance').value;
+      const duration = document.getElementById('duration').value;
+      const weightsType = document.getElementById('weightsType').value;
+
+      if (!type) return;
+
+      const data = getFromLocalStorage();
+      data[selectedDate] = { type, distance, duration, weightsType };
+      saveToLocalStorage(data);
+      closeModal();
+      renderCalendar(currentMonth, currentYear);
+    }
+
+    function updateSummary() {
+      const data = getFromLocalStorage();
+      const filtered = Object.entries(data).filter(([key, val]) => {
+        const date = new Date(key);
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      });
+      let runDist = 0, runTime = 0, swimDist = 0, swimTime = 0, bikeDist = 0, bikeTime = 0, weights = 0, hockey = 0;
+
+      filtered.forEach(([_, val]) => {
+        if (val.type === 'run') {
+          runDist += +val.distance || 0;
+          runTime += +val.duration || 0;
+        }
+        if (val.type === 'swim') {
+          swimDist += +val.distance || 0;
+          swimTime += +val.duration || 0;
+        }
+        if (val.type === 'bike') {
+          bikeDist += +val.distance || 0;
+          bikeTime += +val.duration || 0;
+        }
+        if (val.type === 'weights') weights++;
+        if (val.type === 'hockey') hockey++;
+      });
+
+      summary.innerHTML = `
+        <strong>🏃‍♂️ Run:</strong> ${runDist}km, ${runTime}min<br>
+        <strong>🏊‍♂️ Swim:</strong> ${swimDist}m, ${swimTime}min<br>
+        <strong>🚴‍♂️ Bike:</strong> ${bikeDist}km, ${bikeTime}min<br>
+        <strong>🏋️‍♂️ Weights:</strong> ${weights} sessions<br>
+        <strong>🏑 Hockey:</strong> ${hockey} sessions
+      `;
+    }
+
+    renderCalendar(currentMonth, currentYear);
+  </script>
 </body>
 </html>
