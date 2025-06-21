@@ -42,6 +42,11 @@
     .calendar-day:hover {
       background: #caf0f8;
     }
+    .today {
+      border: 2px solid #0077b6;
+      background: #d0f0fd;
+      font-weight: bold;
+    }
     .summary {
       background: white;
       color: #0077b6;
@@ -104,6 +109,7 @@
       const calendar = document.getElementById('calendar');
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
+      const today = new Date();
       const firstDay = new Date(year, month, 1).getDay();
       const lastDate = new Date(year, month + 1, 0).getDate();
       const offset = firstDay === 0 ? 6 : firstDay - 1;
@@ -117,6 +123,13 @@
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
         dayDiv.textContent = day;
+        if (
+          today.getFullYear() === year &&
+          today.getMonth() === month &&
+          today.getDate() === day
+        ) {
+          dayDiv.classList.add('today');
+        }
         dayDiv.onclick = () => alert(`Log your workout for ${day} ${monthNames[month]}`);
         calendar.appendChild(dayDiv);
       }
