@@ -1,231 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout Calendar</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(to bottom right, #0077b6, #90e0ef);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    header {
-      text-align: center;
-      padding: 1rem;
-    }
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      width: 90%;
-      max-width: 600px;
-      margin-top: 1rem;
-    }
-    .day {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 1rem;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-    }
-    .day.today {
-      font-weight: bold;
-      border: 2px solid white;
-    }
-    .day-header {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-    .month-controls {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .summary {
-      margin-top: 2rem;
-      background: rgba(255,255,255,0.2);
-      padding: 1rem;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 600px;
-    }
-    button {
-      font-size: 1rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
-      border: none;
-      background: white;
-      color: #0077b6;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      margin: 1rem;
-    }
-    .emoji {
-      font-size: 1.5rem;
-      display: block;
-      margin-top: 0.25rem;
-    }
-    .modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      color: black;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      max-width: 90%;
-      z-index: 10;
-    }
-    .modal h3 {
-      margin-top: 0;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 9;
-    }
-  </style>
+  <link rel="stylesheet" href="calendar-style.css" />
 </head>
 <body>
-  <header>
-    <h1>Workout Calendar</h1>
-    <div class="month-controls">
-      <button onclick="prevMonth()">Last Month</button>
-      <div id="monthYear"></div>
-      <button onclick="nextMonth()">Next Month</button>
+  <div class="calendar-container">
+    <h1 id="monthYear"></h1>
+    <div class="calendar-header">
+      <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
     </div>
-    <div class="day-header">M T W T F S S</div>
-  </header>
+    <div id="calendar" class="calendar"></div>
+    <div class="calendar-buttons">
+      <button onclick="changeMonth(-1)">Last Month</button>
+      <button onclick="changeMonth(1)">Next Month</button>
+    </div>
+    <div id="summary" class="summary"></div>
+    <button onclick="window.location.href='index.html'" class="back-button">Back to Main Menu</button>
+  </div>
 
-  <div class="calendar" id="calendar"></div>
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalDate"></h2>
+      <div id="existingWorkout" class="hidden"></div>
+      <div id="inputForm">
+        <label for="type">Workout Type:</label>
+        <select id="type" onchange="toggleDetails()">
+          <option value="">Select...</option>
+          <option value="run">🏃‍♂️ Run</option>
+          <option value="bike">🚴‍♀️ Bike</option>
+          <option value="swim">🏊‍♂️ Swim</option>
+          <option value="weights">🏋️ Weights</option>
+          <option value="hockey">🏑 Hockey</option>
+        </select>
 
-  <div class="summary" id="summary"></div>
-
-  <button onclick="location.href='index.html'">Back to Main Menu</button>
-
-  <div id="modalContainer"></div>
-
-  <script>
-    let currentDate = new Date();
-    let selectedDate = null;
-
-    const workoutEmojis = {
-      run: '🏃',
-      bike: '🚴',
-      swim: '🏊',
-      weights: '🏋️',
-      hockey: '🏑'
-    };
-
-    function renderCalendar() {
-      const calendar = document.getElementById('calendar');
-      calendar.innerHTML = '';
-      const monthYear = document.getElementById('monthYear');
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      monthYear.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
-
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0);
-      const offset = (start.getDay() + 6) % 7; // Monday-start
-
-      for (let i = 0; i < offset; i++) {
-        const empty = document.createElement('div');
-        calendar.appendChild(empty);
-      }
-
-      const stored = JSON.parse(localStorage.getItem('calendarWorkouts')) || {};
-
-      for (let d = 1; d <= end.getDate(); d++) {
-        const dateStr = `${year}-${month + 1}-${d}`;
-        const day = document.createElement('div');
-        day.className = 'day';
-        day.textContent = d;
-        if (
-          d === new Date().getDate() &&
-          month === new Date().getMonth() &&
-          year === new Date().getFullYear()
-        ) {
-          day.classList.add('today');
-        }
-        if (stored[dateStr]) {
-          const emoji = workoutEmojis[stored[dateStr].type];
-          if (emoji) {
-            const e = document.createElement('span');
-            e.className = 'emoji';
-            e.textContent = emoji;
-            day.appendChild(e);
-          }
-        }
-        day.onclick = () => openModal(dateStr, stored[dateStr]);
-        calendar.appendChild(day);
-      }
-    }
-
-    function openModal(dateStr, workout) {
-      const modalContainer = document.getElementById('modalContainer');
-      modalContainer.innerHTML = `
-        <div class="overlay" onclick="closeModal()"></div>
-        <div class="modal">
-          <h3>${dateStr}</h3>
-          ${workout ? `
-            <p><strong>Type:</strong> ${workout.type}</p>
-            ${workout.distance ? `<p><strong>Distance:</strong> ${workout.distance}m</p>` : ''}
-            ${workout.time ? `<p><strong>Time:</strong> ${workout.time}min</p>` : ''}
-            ${workout.detail ? `<p><strong>Detail:</strong> ${workout.detail}</p>` : ''}
-            <button onclick="editWorkout('${dateStr}')">Edit</button>
-            <button onclick="deleteWorkout('${dateStr}')">Delete</button>
-          ` : `
-            <p>No workout logged.</p>
-            <button onclick="editWorkout('${dateStr}')">Add Workout</button>
-          `}
-          <button onclick="closeModal()">Back</button>
+        <div id="distanceTimeFields" class="hidden">
+          <input type="number" id="distance" placeholder="Distance (km)" />
+          <input type="number" id="duration" placeholder="Time (minutes)" />
         </div>
-      `;
-    }
 
-    function closeModal() {
-      document.getElementById('modalContainer').innerHTML = '';
-    }
+        <div id="weightsOptions" class="hidden">
+          <select id="weightsType">
+            <option value="push">Push</option>
+            <option value="pull">Pull</option>
+            <option value="legs">Legs</option>
+          </select>
+        </div>
 
-    function deleteWorkout(dateStr) {
-      const stored = JSON.parse(localStorage.getItem('calendarWorkouts')) || {};
-      delete stored[dateStr];
-      localStorage.setItem('calendarWorkouts', JSON.stringify(stored));
-      closeModal();
-      renderCalendar();
-    }
+        <button onclick="saveWorkout()">Save</button>
+      </div>
+      <div id="existingButtons" class="hidden">
+        <button onclick="editWorkout()">Edit</button>
+        <button onclick="deleteWorkout()">Delete</button>
+      </div>
+      <button onclick="closeModal()">Back</button>
+    </div>
+  </div>
 
-    function editWorkout(dateStr) {
-      // You can hook in your input UI modal here
-      alert(`Feature to edit/add workout for ${dateStr} coming next`);
-    }
-
-    function prevMonth() {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendar();
-    }
-
-    function nextMonth() {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar();
-    }
-
-    renderCalendar();
-  </script>
+  <script src="calendar-script.js"></script>
 </body>
 </html>
