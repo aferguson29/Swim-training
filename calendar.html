@@ -121,7 +121,6 @@
   </div>
 
   <div class="summary" id="monthlySummary"></div>
-
   <div class="monthly-breakdown" id="monthlyBreakdown"></div>
 
   <button class="button" onclick="location.href='index.html'">Exit to Main Menu</button>
@@ -199,16 +198,81 @@
     }
 
     function openWorkoutModal(date, entry) {
+      const existing = entry ? entry.type : '';
+      const dist = entry?.distance || '';
+      const time = entry?.time || '';
+      const weightsType = entry?.weightsType || '';
       const modalHTML = `
         <div class="modal-overlay" onclick="this.remove()">
           <div class="modal" onclick="event.stopPropagation()">
             <h3>Log Workout for ${date}</h3>
-            <p>Workout logging interface goes here...</p>
+            <label for="workoutType">Workout Type:</label>
+            <select id="workoutType" onchange="toggleWorkoutInputs()">
+              <option value="">Select</option>
+              <option value="Run" ${existing === 'Run' ? 'selected' : ''}>Run</option>
+              <option value="Bike" ${existing === 'Bike' ? 'selected' : ''}>Bike</option>
+              <option value="Swim" ${existing === 'Swim' ? 'selected' : ''}>Swim</option>
+              <option value="Weights" ${existing === 'Weights' ? 'selected' : ''}>Weights</option>
+              <option value="Hockey" ${existing === 'Hockey' ? 'selected' : ''}>Hockey</option>
+            </select>
+
+            <div id="distanceTimeFields">
+              <label for="distance">Distance:</label>
+              <input type="number" id="distance" value="${dist}" />
+              <label for="time">Time (minutes):</label>
+              <input type="number" id="time" value="${time}" />
+            </div>
+
+            <div id="weightsFields" style="display:none">
+              <label for="weightsType">Weights Type:</label>
+              <select id="weightsType">
+                <option value="Push" ${weightsType === 'Push' ? 'selected' : ''}>Push</option>
+                <option value="Pull" ${weightsType === 'Pull' ? 'selected' : ''}>Pull</option>
+                <option value="Legs" ${weightsType === 'Legs' ? 'selected' : ''}>Legs</option>
+              </select>
+            </div>
+
+            <button class="button" onclick="saveWorkout('${date}')">Save</button>
+            <button class="button" onclick="deleteWorkout('${date}')">Delete</button>
             <button class="button" onclick="document.querySelector('.modal-overlay').remove()">Back</button>
           </div>
         </div>
       `;
       document.getElementById('modalContainer').innerHTML = modalHTML;
+      toggleWorkoutInputs();
+    }
+
+    function toggleWorkoutInputs() {
+      const type = document.getElementById('workoutType').value;
+      document.getElementById('distanceTimeFields').style.display = ['Run','Bike','Swim'].includes(type) ? 'block' : 'none';
+      document.getElementById('weightsFields').style.display = type === 'Weights' ? 'block' : 'none';
+    }
+
+    function saveWorkout(date) {
+      const workouts = JSON.parse(localStorage.getItem('calendarWorkouts') || '{}');
+      const type = document.getElementById('workoutType').value;
+      if (!type) return alert('Please select a workout type.');
+
+      const entry = { type };
+      if (['Run','Bike','Swim'].includes(type)) {
+        entry.distance = parseFloat(document.getElementById('distance').value) || 0;
+        entry.time = parseFloat(document.getElementById('time').value) || 0;
+      } else if (type === 'Weights') {
+        entry.weightsType = document.getElementById('weightsType').value;
+      }
+
+      workouts[date] = entry;
+      localStorage.setItem('calendarWorkouts', JSON.stringify(workouts));
+      document.querySelector('.modal-overlay').remove();
+      generateCalendar();
+    }
+
+    function deleteWorkout(date) {
+      const workouts = JSON.parse(localStorage.getItem('calendarWorkouts') || '{}');
+      delete workouts[date];
+      localStorage.setItem('calendarWorkouts', JSON.stringify(workouts));
+      document.querySelector('.modal-overlay').remove();
+      generateCalendar();
     }
 
     function updateMonthlyBreakdown(workouts, year, month) {
