@@ -32,7 +32,7 @@
       background: white;
       color: #0077b6;
       border-radius: 10px;
-      padding: 0.5rem;
+      padding: 0.75rem;
       font-weight: bold;
       position: relative;
     }
@@ -50,9 +50,9 @@
     }
     .icon {
       position: absolute;
-      bottom: 2px;
+      bottom: 4px;
       right: 4px;
-      font-size: 0.9rem;
+      font-size: 1.25rem;
     }
     .summary {
       background: white;
@@ -137,6 +137,7 @@
         <option value="bike">Bike</option>
         <option value="swim">Swim</option>
         <option value="weights">Weights</option>
+        <option value="hockey">Hockey</option>
       </select>
 
       <div id="distanceTimeFields">
@@ -186,17 +187,15 @@
       const firstDay = new Date(year, month, 1).getDay();
       const lastDate = new Date(year, month + 1, 0).getDate();
       const offset = firstDay === 0 ? 6 : firstDay - 1;
-      const logs = JSON.parse(localStorage.getItem('calendarWorkouts')) || [];
 
       calendar.innerHTML = '';
+      const stored = JSON.parse(localStorage.getItem('calendarWorkouts')) || [];
+
       for (let i = 0; i < offset; i++) {
         const emptyCell = document.createElement('div');
         calendar.appendChild(emptyCell);
       }
       for (let day = 1; day <= lastDate; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const workouts = logs.filter(entry => entry.date === dateStr);
-
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
         dayDiv.textContent = day;
@@ -209,19 +208,19 @@
           dayDiv.classList.add('today');
         }
 
-        if (workouts.length) {
-          const iconSpan = document.createElement('span');
-          iconSpan.className = 'icon';
-          iconSpan.textContent = workouts.map(w => {
-            switch (w.type) {
-              case 'run': return '🏃‍♂️';
-              case 'bike': return '🚴‍♂️';
-              case 'swim': return '🏊‍♂️';
-              case 'weights': return '🏋️‍♂️';
-              default: return '';
-            }
-          }).join('');
-          dayDiv.appendChild(iconSpan);
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const entry = stored.find(e => e.date === dateStr);
+        if (entry) {
+          const icon = document.createElement('div');
+          icon.className = 'icon';
+          icon.textContent = {
+            run: '🏃‍♂️',
+            bike: '🚴‍♂️',
+            swim: '🏊‍♂️',
+            weights: '🏋️‍♂️',
+            hockey: '🏑'
+          }[entry.type] || '✔';
+          dayDiv.appendChild(icon);
         }
 
         dayDiv.onclick = () => openModal(day);
@@ -266,8 +265,8 @@
       const log = {
         date: selectedDay.toISOString().split('T')[0],
         type,
-        distance: type !== 'weights' ? distance : null,
-        duration: type !== 'weights' ? duration : null,
+        distance: ['run','bike','swim'].includes(type) ? distance : null,
+        duration: ['run','bike','swim'].includes(type) ? duration : null,
         weightsFocus: type === 'weights' ? weightsType : null
       };
 
@@ -276,8 +275,8 @@
       localStorage.setItem('calendarWorkouts', JSON.stringify(existingLogs));
 
       closeModal();
-      generateCalendar();
       alert('Workout saved!');
+      generateCalendar();
     }
 
     updateMonthHeader();
