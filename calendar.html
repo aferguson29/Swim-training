@@ -7,181 +7,203 @@
   <style>
     body {
       margin: 0;
-      padding: 1rem;
+      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: linear-gradient(to bottom right, #0077b6, #90e0ef);
-      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 100vh;
+      color: white;
     }
 
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
+      margin-top: 1rem;
     }
 
-    .month-header {
+    .calendar-header {
       font-size: 1.25rem;
-      margin: 1rem 0 0.5rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      width: 90%;
+      max-width: 600px;
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+      color: white;
     }
 
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 0.5rem;
-      max-width: 100%;
-      margin-bottom: 1rem;
-    }
-
-    .day-name {
-      font-weight: bold;
-      text-align: center;
-      color: #e0f7fa;
+      width: 90%;
+      max-width: 600px;
+      margin-top: 0.5rem;
     }
 
     .day {
-      background-color: rgba(255, 255, 255, 0.8);
-      color: #0077b6;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
       padding: 0.75rem;
       text-align: center;
-      border-radius: 12px;
-      cursor: pointer;
       position: relative;
     }
 
-    .day.today {
-      border: 2px solid #ffcc00;
+    .today {
+      font-weight: bold;
+      border: 2px solid white;
     }
 
     .emoji {
-      display: block;
-      font-size: 1.25rem;
-      margin-top: 0.25rem;
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
     }
 
-    .buttons {
+    .month-controls {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      margin-bottom: 1rem;
+      margin-top: 1rem;
     }
 
-    button {
+    .month-controls button {
       font-size: 1rem;
       padding: 0.5rem 1rem;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-      background-color: #ffffff;
+      background: white;
       color: #0077b6;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .summary {
-      margin-top: 1rem;
-      background-color: #ffffffaa;
-      color: #0077b6;
+      margin-top: 2rem;
+      background-color: rgba(255, 255, 255, 0.2);
       padding: 1rem;
       border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 600px;
+      color: white;
+    }
+
+    .summary h3 {
+      margin-top: 0;
+    }
+
+    .back-button {
+      margin: 2rem 0;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: none;
+      background-color: white;
+      color: #0077b6;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
   </style>
 </head>
 <body>
   <h1>Workout Calendar</h1>
-  <div class="month-header" id="monthHeader"></div>
-  <div class="buttons">
+  <div class="calendar-header" id="monthLabel"></div>
+  <div class="weekdays">
+    <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+  </div>
+  <div class="calendar" id="calendar"></div>
+  <div class="month-controls">
     <button onclick="changeMonth(-1)">Last Month</button>
     <button onclick="changeMonth(1)">Next Month</button>
   </div>
-
-  <div class="calendar" id="calendar">
-    <div class="day-name">M</div>
-    <div class="day-name">T</div>
-    <div class="day-name">W</div>
-    <div class="day-name">T</div>
-    <div class="day-name">F</div>
-    <div class="day-name">S</div>
-    <div class="day-name">S</div>
-  </div>
-
-  <div class="summary" id="summary"></div>
+  <div class="summary" id="monthlySummary"></div>
+  <button class="back-button" onclick="window.location.href='index.html'">Back to Main Menu</button>
 
   <script>
-    const calendarEl = document.getElementById("calendar");
-    const monthHeader = document.getElementById("monthHeader");
-    const summaryEl = document.getElementById("summary");
+    const calendarEl = document.getElementById('calendar');
+    const monthLabel = document.getElementById('monthLabel');
+    const summaryEl = document.getElementById('monthlySummary');
+
     let currentDate = new Date();
 
-    function loadCalendar(date) {
-      const year = date.getFullYear();
-      const month = date.getMonth();
+    function renderCalendar() {
+      calendarEl.innerHTML = '';
+      summaryEl.innerHTML = '';
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
       const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const firstWeekday = (firstDay.getDay() + 6) % 7;
+      const startDay = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
       const today = new Date();
 
-      calendarEl.innerHTML = `
-        <div class="day-name">M</div>
-        <div class="day-name">T</div>
-        <div class="day-name">W</div>
-        <div class="day-name">T</div>
-        <div class="day-name">F</div>
-        <div class="day-name">S</div>
-        <div class="day-name">S</div>
-      `;
+      monthLabel.textContent = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
 
-      for (let i = 0; i < firstWeekday; i++) {
-        calendarEl.innerHTML += `<div></div>`;
+      const workoutData = JSON.parse(localStorage.getItem('calendarWorkouts') || '{}');
+
+      for (let i = 0; i < startDay; i++) {
+        calendarEl.appendChild(document.createElement('div'));
       }
 
-      const data = JSON.parse(localStorage.getItem("calendarWorkouts") || "{}");
-      let bike = 0, run = 0, swim = 0;
-      let timeBike = 0, timeRun = 0, timeSwim = 0;
+      const totals = { run: { distance: 0, time: 0 }, bike: { distance: 0, time: 0 }, swim: { distance: 0, time: 0 }, weights: 0, hockey: 0 };
 
-      for (let d = 1; d <= lastDay.getDate(); d++) {
-        const fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
-        const dayData = data[fullDate] || [];
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const cell = document.createElement('div');
+        cell.className = 'day';
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          cell.classList.add('today');
+        }
+        cell.textContent = day;
 
-        let emojis = dayData.map(entry => {
-          if (entry.type === 'bike') { bike += entry.distance || 0; timeBike += entry.time || 0; return '🚴‍♂️'; }
-          if (entry.type === 'run') { run += entry.distance || 0; timeRun += entry.time || 0; return '🏃‍♂️'; }
-          if (entry.type === 'swim') { swim += entry.distance || 0; timeSwim += entry.time || 0; return '🏊‍♂️'; }
-          if (entry.type === 'weights') return '🏋️';
-          if (entry.type === 'hockey') return '🏑';
-          return '';
-        }).join('');
+        const dayWorkouts = workoutData[dateStr] || [];
+        if (dayWorkouts.length > 0) {
+          const emoji = document.createElement('div');
+          emoji.className = 'emoji';
+          emoji.textContent = dayWorkouts.map(w => {
+            if (w.type === 'run') return '🏃';
+            if (w.type === 'bike') return '🚴';
+            if (w.type === 'swim') return '🏊';
+            if (w.type === 'weights') return '🏋️';
+            if (w.type === 'hockey') return '🏑';
+            return '';
+          }).join('');
+          cell.appendChild(emoji);
 
-        calendarEl.innerHTML += `
-          <div class="day${isToday ? ' today' : ''}" onclick="selectDate('${fullDate}')">
-            ${d}
-            <span class="emoji">${emojis}</span>
-          </div>`;
+          for (const w of dayWorkouts) {
+            if (w.type === 'weights') totals.weights++;
+            else if (w.type === 'hockey') totals.hockey++;
+            else if (totals[w.type]) {
+              totals[w.type].distance += w.distance || 0;
+              totals[w.type].time += w.time || 0;
+            }
+          }
+        }
+
+        calendarEl.appendChild(cell);
       }
-
-      monthHeader.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
 
       summaryEl.innerHTML = `
-        <strong>🚴‍♂️ Bike</strong>: ${bike} km, ${timeBike} min<br>
-        <strong>🏃‍♂️ Run</strong>: ${run} km, ${timeRun} min<br>
-        <strong>🏊‍♂️ Swim</strong>: ${swim} m, ${timeSwim} min
+        <h3>Monthly Summary</h3>
+        🏃 Run – ${totals.run.distance} m, ${totals.run.time} min<br>
+        🚴 Bike – ${totals.bike.distance} m, ${totals.bike.time} min<br>
+        🏊 Swim – ${totals.swim.distance} m, ${totals.swim.time} min<br>
+        🏋️ Weights – ${totals.weights} sessions<br>
+        🏑 Hockey – ${totals.hockey} sessions
       `;
     }
 
     function changeMonth(offset) {
       currentDate.setMonth(currentDate.getMonth() + offset);
-      loadCalendar(currentDate);
+      renderCalendar();
     }
 
-    function selectDate(date) {
-      alert(`Select workout for ${date} – input form coming soon.`);
-    }
-
-    loadCalendar(currentDate);
+    renderCalendar();
   </script>
 </body>
 </html>
