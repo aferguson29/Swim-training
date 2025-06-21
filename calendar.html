@@ -32,8 +32,9 @@
       background: white;
       color: #0077b6;
       border-radius: 10px;
-      padding: 0.75rem;
+      padding: 0.5rem;
       font-weight: bold;
+      position: relative;
     }
     .calendar-day {
       cursor: pointer;
@@ -46,6 +47,12 @@
       border: 2px solid #0077b6;
       background: #d0f0fd;
       font-weight: bold;
+    }
+    .icon {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 0.9rem;
     }
     .summary {
       background: white;
@@ -70,6 +77,38 @@
     .month-controls {
       margin-bottom: 2rem;
     }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      color: #0077b6;
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      text-align: left;
+    }
+    .modal-content h3 {
+      margin-top: 0;
+    }
+    .modal-content label, .modal-content select, .modal-content input {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .modal-content button {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -88,6 +127,39 @@
 
   <button class="button" onclick="location.href='index.html'">Exit to Main Menu</button>
 
+  <div id="modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3 id="selectedDateLabel">Log Workout</h3>
+      <label for="workoutType">Workout Type</label>
+      <select id="workoutType" onchange="toggleWorkoutFields()">
+        <option value="">Select</option>
+        <option value="run">Run</option>
+        <option value="bike">Bike</option>
+        <option value="swim">Swim</option>
+        <option value="weights">Weights</option>
+      </select>
+
+      <div id="distanceTimeFields">
+        <label for="distance">Distance (km)</label>
+        <input type="number" id="distance" placeholder="Distance">
+        <label for="duration">Time (minutes)</label>
+        <input type="number" id="duration" placeholder="Time">
+      </div>
+
+      <div id="weightsFields" style="display:none;">
+        <label for="weightsType">Workout Focus</label>
+        <select id="weightsType">
+          <option value="">Select</option>
+          <option value="push">Push</option>
+          <option value="pull">Pull</option>
+          <option value="legs">Legs</option>
+        </select>
+      </div>
+
+      <button class="button" onclick="saveWorkout()">Save Workout</button>
+    </div>
+  </div>
+
   <script>
     const calendarDaysHeader = document.getElementById('calendar-days-header');
     const daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -100,6 +172,7 @@
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     let currentDate = new Date();
+    let selectedDay = null;
 
     function updateMonthHeader() {
       document.getElementById('monthHeader').textContent = monthNames[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
@@ -113,6 +186,7 @@
       const firstDay = new Date(year, month, 1).getDay();
       const lastDate = new Date(year, month + 1, 0).getDate();
       const offset = firstDay === 0 ? 6 : firstDay - 1;
+      const logs = JSON.parse(localStorage.getItem('calendarWorkouts')) || [];
 
       calendar.innerHTML = '';
       for (let i = 0; i < offset; i++) {
@@ -120,9 +194,13 @@
         calendar.appendChild(emptyCell);
       }
       for (let day = 1; day <= lastDate; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const workouts = logs.filter(entry => entry.date === dateStr);
+
         const dayDiv = document.createElement('div');
         dayDiv.className = 'calendar-day';
         dayDiv.textContent = day;
+
         if (
           today.getFullYear() === year &&
           today.getMonth() === month &&
@@ -130,7 +208,23 @@
         ) {
           dayDiv.classList.add('today');
         }
-        dayDiv.onclick = () => alert(`Log your workout for ${day} ${monthNames[month]}`);
+
+        if (workouts.length) {
+          const iconSpan = document.createElement('span');
+          iconSpan.className = 'icon';
+          iconSpan.textContent = workouts.map(w => {
+            switch (w.type) {
+              case 'run': return '🏃‍♂️';
+              case 'bike': return '🚴‍♂️';
+              case 'swim': return '🏊‍♂️';
+              case 'weights': return '🏋️‍♂️';
+              default: return '';
+            }
+          }).join('');
+          dayDiv.appendChild(iconSpan);
+        }
+
+        dayDiv.onclick = () => openModal(day);
         calendar.appendChild(dayDiv);
       }
     }
@@ -139,6 +233,51 @@
       currentDate.setMonth(currentDate.getMonth() + delta);
       updateMonthHeader();
       generateCalendar();
+    }
+
+    function openModal(day) {
+      selectedDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      const month = currentDate.getMonth();
+      const year = currentDate.getFullYear();
+      document.getElementById('selectedDateLabel').textContent = `Log Workout for ${day} ${monthNames[month]}, ${year}`;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+      document.getElementById('workoutType').value = '';
+      document.getElementById('distance').value = '';
+      document.getElementById('duration').value = '';
+      document.getElementById('weightsType').value = '';
+    }
+
+    function toggleWorkoutFields() {
+      const type = document.getElementById('workoutType').value;
+      document.getElementById('distanceTimeFields').style.display = ['run','bike','swim'].includes(type) ? 'block' : 'none';
+      document.getElementById('weightsFields').style.display = type === 'weights' ? 'block' : 'none';
+    }
+
+    function saveWorkout() {
+      const type = document.getElementById('workoutType').value;
+      const distance = document.getElementById('distance').value;
+      const duration = document.getElementById('duration').value;
+      const weightsType = document.getElementById('weightsType').value;
+
+      const log = {
+        date: selectedDay.toISOString().split('T')[0],
+        type,
+        distance: type !== 'weights' ? distance : null,
+        duration: type !== 'weights' ? duration : null,
+        weightsFocus: type === 'weights' ? weightsType : null
+      };
+
+      const existingLogs = JSON.parse(localStorage.getItem('calendarWorkouts')) || [];
+      existingLogs.push(log);
+      localStorage.setItem('calendarWorkouts', JSON.stringify(existingLogs));
+
+      closeModal();
+      generateCalendar();
+      alert('Workout saved!');
     }
 
     updateMonthHeader();
