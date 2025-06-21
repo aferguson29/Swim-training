@@ -54,7 +54,7 @@
       right: 5px;
       font-size: 1.2rem;
     }
-    .summary {
+    .summary, .monthly-breakdown {
       background: white;
       color: #0077b6;
       border-radius: 12px;
@@ -62,6 +62,7 @@
       max-width: 420px;
       margin: 0 auto 2rem;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-align: left;
     }
     .button {
       font-size: 1rem;
@@ -120,6 +121,8 @@
   </div>
 
   <div class="summary" id="monthlySummary"></div>
+
+  <div class="monthly-breakdown" id="monthlyBreakdown"></div>
 
   <button class="button" onclick="location.href='index.html'">Exit to Main Menu</button>
 
@@ -185,6 +188,8 @@
         dayDiv.onclick = () => openWorkoutModal(dateStr, entry);
         calendar.appendChild(dayDiv);
       }
+
+      updateMonthlyBreakdown(workouts, year, month);
     }
 
     function changeMonth(delta) {
@@ -204,6 +209,30 @@
         </div>
       `;
       document.getElementById('modalContainer').innerHTML = modalHTML;
+    }
+
+    function updateMonthlyBreakdown(workouts, year, month) {
+      const breakdown = {
+        Run: { distance: 0, time: 0 },
+        Bike: { distance: 0, time: 0 },
+        Swim: { distance: 0, time: 0 }
+      };
+
+      for (const [dateStr, entry] of Object.entries(workouts)) {
+        const [y, m] = dateStr.split('-').map(Number);
+        if (y === year && m === month + 1 && breakdown[entry.type]) {
+          breakdown[entry.type].distance += entry.distance || 0;
+          breakdown[entry.type].time += entry.time || 0;
+        }
+      }
+
+      const breakdownHTML = `
+        <h3>Monthly Summary</h3>
+        <p>🚴‍♂️ Bike — ${breakdown.Bike.distance} km in ${breakdown.Bike.time} min</p>
+        <p>🏃‍♂️ Run — ${breakdown.Run.distance} km in ${breakdown.Run.time} min</p>
+        <p>🏊‍♂️ Swim — ${breakdown.Swim.distance} m in ${breakdown.Swim.time} min</p>
+      `;
+      document.getElementById('monthlyBreakdown').innerHTML = breakdownHTML;
     }
 
     updateMonthHeader();
