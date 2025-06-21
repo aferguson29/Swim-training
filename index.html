@@ -42,6 +42,16 @@
       font-weight: bold;
       margin-bottom: 1rem;
     }
+    .event {
+      font-size: 1.25rem;
+      color: red;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    .countdown, .week-info {
+      font-size: 1rem;
+      margin-top: 0.25rem;
+    }
     .button-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -66,6 +76,11 @@
 </head>
 <body>
   <div class="emoji">🏊‍♂️</div> <div class="wave">🌊</div><div class="wave">🌊</div>
+
+  <div class="event">Ironman Dubai 70.3 – March 14, 2026</div>
+  <div class="countdown" id="countdownText"></div>
+  <div class="week-info" id="weekInfoText"></div>
+
   <h1>Welcome to Swim Tracker</h1>
 
   <div class="button-grid">
@@ -75,5 +90,19 @@
     <button onclick="location.href='progress-workout-b.html'">Progress Summary (Workout B)</button>
     <button onclick="location.href='calendar.html'">Logged Workouts</button>
   </div>
+
+  <script>
+    const raceDate = new Date("2026-03-14");
+    const today = new Date();
+
+    const diffTime = raceDate - today;
+    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById("countdownText").textContent = `Countdown: ${daysLeft} days to go`;
+
+    const weekOneStart = new Date("2025-06-23");
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const weekDiff = Math.floor((today - weekOneStart) / msPerWeek) + 1;
+    document.getElementById("weekInfoText").textContent = `You are in week ${weekDiff > 0 ? weekDiff : 0} of your training plan.`;
+  </script>
 </body>
 </html>
