@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout Calendar</title>
   <link rel="stylesheet" href="calendar-style.css" />
+  <style>
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #0077b6;
+    }
+    .summary {
+      margin-top: 2rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .summary h3 {
+      margin-bottom: 0.5rem;
+      color: #0077b6;
+    }
+    .summary p {
+      margin: 0.3rem 0;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <div class="calendar-container">
@@ -17,7 +45,14 @@
       <button onclick="changeMonth(-1)">Last Month</button>
       <button onclick="changeMonth(1)">Next Month</button>
     </div>
-    <div id="summary" class="summary"></div>
+    <div id="summary" class="summary">
+      <h3>Monthly Summary</h3>
+      <p>🏃‍♂️ Run: <span id="runSummary"></span></p>
+      <p>🚴‍♀️ Bike: <span id="bikeSummary"></span></p>
+      <p>🏊‍♂️ Swim: <span id="swimSummary"></span></p>
+      <p>🏋️ Weights: <span id="weightsSummary"></span></p>
+      <p>🏑 Hockey: <span id="hockeySummary"></span></p>
+    </div>
     <button onclick="window.location.href='index.html'" class="back-button">Back to Main Menu</button>
   </div>
 
