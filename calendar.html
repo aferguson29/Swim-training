@@ -17,23 +17,34 @@
       font-size: 2rem;
       margin-bottom: 1rem;
     }
-    #calendar {
+    .calendar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 0.5rem;
+      width: 100%;
       max-width: 600px;
-      margin: 1rem auto;
     }
     .day {
       background: white;
       color: #0077b6;
       border-radius: 10px;
-      padding: 1rem;
-      position: relative;
+      padding: 0.5rem;
       min-height: 80px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
       cursor: pointer;
     }
     .day.today {
@@ -49,17 +60,13 @@
     }
     button {
       font-size: 1rem;
-      margin-top: 2rem;
+      margin: 1rem 0.5rem;
       padding: 0.75rem 1.25rem;
       border: none;
       border-radius: 10px;
       color: #0077b6;
       background: white;
       cursor: pointer;
-    }
-    .header {
-      font-size: 1.25rem;
-      margin: 1rem 0;
     }
     .days-labels {
       display: grid;
@@ -72,18 +79,21 @@
 </head>
 <body>
   <h1>Workout Calendar</h1>
-  <div class="header" id="monthHeader"></div>
-  <div class="days-labels">
-    <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+  <div class="calendar-wrapper">
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">Last Month</button>
+      <div id="monthHeader"></div>
+      <button onclick="changeMonth(1)">Next Month</button>
+    </div>
+    <div class="days-labels">
+      <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+    </div>
+    <div class="calendar-grid" id="calendar"></div>
+    <div class="summary" id="monthlySummary"></div>
+    <button onclick="goBack()">Exit</button>
   </div>
-  <div id="calendar"></div>
-  <div class="summary" id="monthlySummary"></div>
-  <button onclick="goBack()">Exit</button>
 
   <script>
-    const calendarEl = document.getElementById("calendar");
-    const monthHeader = document.getElementById("monthHeader");
-    const summaryEl = document.getElementById("monthlySummary");
     let currentDate = new Date();
 
     function formatDate(date) {
@@ -94,6 +104,10 @@
       return JSON.parse(localStorage.getItem("calendarWorkouts")) || {};
     }
 
+    function saveWorkouts(workouts) {
+      localStorage.setItem("calendarWorkouts", JSON.stringify(workouts));
+    }
+
     function renderCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -102,14 +116,17 @@
 
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-      const startDay = firstDay.getDay() || 7;
+      const startDay = (firstDay.getDay() + 6) % 7; // Adjust to make Monday the first day
 
+      const calendarEl = document.getElementById("calendar");
       calendarEl.innerHTML = "";
+
+      const monthHeader = document.getElementById("monthHeader");
       monthHeader.textContent = `${currentDate.toLocaleString("default", {
         month: "long",
       })} ${year}`;
 
-      for (let i = 1; i < startDay; i++) {
+      for (let i = 0; i < startDay; i++) {
         const blank = document.createElement("div");
         calendarEl.appendChild(blank);
       }
@@ -126,9 +143,9 @@
         ) {
           div.classList.add("today");
         }
-        div.innerHTML = `<div>${day}</div><div class="icons">${renderIcons(
-          workouts[iso] || []
-        )}</div>`;
+
+        const icons = renderIcons(workouts[iso] || []);
+        div.innerHTML = `<div>${day}</div><div class="icons">${icons}</div>`;
         calendarEl.appendChild(div);
       }
 
@@ -194,6 +211,7 @@
         }
       });
 
+      const summaryEl = document.getElementById("monthlySummary");
       summaryEl.innerHTML = `
         <div>🏊‍♂️ Swim: ${swim}m, ${swimTime}min</div>
         <div>🚴‍♂️ Bike: ${bike}m, ${bikeTime}min</div>
@@ -201,6 +219,11 @@
         <div>🏋️‍♂️ Weights: ${weights} sessions</div>
         <div>🏑 Hockey: ${hockey} sessions</div>
       `;
+    }
+
+    function changeMonth(offset) {
+      currentDate.setMonth(currentDate.getMonth() + offset);
+      renderCalendar();
     }
 
     function goBack() {
